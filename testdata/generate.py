@@ -28,4 +28,4 @@ def generate_file(filename, target_size):
     print(f"Generated {filename} with size {os.path.getsize(filename)} bytes")
 
 
-generate_file("test1.txt", 200)
+generate_file("test1.txt", 20 * 1024)
