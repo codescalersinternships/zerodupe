@@ -28,7 +28,7 @@ func concatHashes(bloackHashes []string) []byte {
 	return []byte(result)
 }
 
-func PostFile(w http.ResponseWriter, r *http.Request) {
+func Upload(w http.ResponseWriter, r *http.Request) {
 	//create dirs if not exist
 	os.MkdirAll(filepath.Join(StorageRoot, BlocksDir), 0755)
 	os.MkdirAll(filepath.Join(StorageRoot, MetadataDir), 0755)

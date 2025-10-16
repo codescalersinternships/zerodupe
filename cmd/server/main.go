@@ -13,7 +13,7 @@ func handleRequests() {
 	r := router.NewRouter()
 
 	r.Get("/", server.HomePage)
-	r.Post("/upload", server.PostFile)
+	r.Post("/upload", server.Upload)
 
 	fmt.Println("Server starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", r))
