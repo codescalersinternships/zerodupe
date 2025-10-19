@@ -57,3 +57,63 @@ func TestUpload(t *testing.T) {
 		})
 	}
 }
+
+func TestDownload(t *testing.T) {
+	tests := []struct {
+		name         string
+		expectedFile string
+		code         int
+		passedHash   string
+	}{
+		{
+			name:         "correct testcase",
+			expectedFile: "../../testdata/files/test1.txt",
+			code:         http.StatusOK,
+			passedHash:   "9d259d5d9057fec99f14f4025f76188bff1de029cffe020440a474e8739a7719",
+		},
+		{
+			name:         "empty file",
+			expectedFile: "../../testdata/files/empty.txt",
+			code:         http.StatusOK,
+			passedHash:   "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		},
+		{
+			name:       "file hash not passed",
+			code:       http.StatusNotFound,
+			passedHash: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			endpoint := "http://localhost:8080/download" + "/" + tt.passedHash
+			resp, err := http.Get(endpoint)
+			if err != nil {
+				t.Fatalf("failed to send request: %v", err)
+			}
+			defer resp.Body.Close()
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("failed to read response body: %v", err)
+			}
+
+			if resp.StatusCode != tt.code {
+				t.Errorf("expected status %v, got %v", tt.code, resp.StatusCode)
+			}
+
+			if tt.code != http.StatusNotFound {
+				expectedFileData, err := os.ReadFile(tt.expectedFile)
+				if err != nil {
+					t.Fatalf("failed to read file: %v", err)
+				}
+
+				if string(expectedFileData) != string(body) {
+					t.Errorf("unexpected response body: got %s, want %s", string(body), string(expectedFileData))
+				}
+			}
+
+		})
+	}
+}

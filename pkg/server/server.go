@@ -94,11 +94,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 func Download(w http.ResponseWriter, r *http.Request) {
 	requestedFileHash := strings.TrimPrefix(r.URL.Path, "/download/")
 
-	if requestedFileHash == "" {
-		http.Error(w, "file hash not provided", http.StatusBadRequest)
-		return
-	}
-
 	metadataPath := filepath.Join(StorageRoot, MetadataDir, requestedFileHash[0:4], requestedFileHash)
 	metadata, err := os.ReadFile(metadataPath)
 	if err != nil {
