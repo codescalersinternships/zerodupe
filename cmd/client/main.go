@@ -1,18 +1,36 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"os"
+
 	"github.com/codescalersinternships/zerodupe/pkg/client"
 )
 
 func main() {
-	// _, err := client.Upload("./testdata/files/test1.txt")
-	// if err != nil {
-	// 	panic(err)
-	// }
+	uploadPath := flag.String("upload", "", "Path to the file to upload")
+	downloadHash := flag.String("download", "", "Hash of the file to download")
+	outputFile := flag.String("out", "downloaded", "output path for downloaded file")
+	flag.Parse()
 
-	_, err := client.Download("9d259d5d9057fec99f14f4025f76188bff1de029cffe020440a474e8739a7719")
-	if err != nil {
-		panic(err)
+	if *uploadPath != "" {
+		hash, err := client.Upload(*uploadPath)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Upload successful, file hash:", hash)
+
+	} else if *downloadHash != "" {
+		file, err := client.Download(*downloadHash)
+		if err != nil {
+			panic(err)
+		}
+		err = os.WriteFile(*outputFile, []byte(file), 0644)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Download successful. file saved at ", *outputFile)
 	}
 
 }
