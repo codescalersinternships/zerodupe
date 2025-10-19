@@ -22,8 +22,29 @@ func Upload(filepath string) (*http.Response, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return resp, fmt.Errorf("failed to read response body: %v", err)
 	}
+	fmt.Println("Response status:", resp.Status)
+	fmt.Printf("Response Body:\n%s\n", body)
+
+	return resp, nil
+}
+
+func Download(fileHash string) (*http.Response, error) {
+
+	endpoint := "http://localhost:8080/download" + "/" + fileHash
+
+	resp, err := http.Get(endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return resp, fmt.Errorf("failed to read response body: %v", err)
+	}
+
 	fmt.Println("Response status:", resp.Status)
 	fmt.Printf("Response Body:\n%s\n", body)
 
