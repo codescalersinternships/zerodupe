@@ -5,9 +5,52 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
+func countFiles(dir string) int {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return 0
+	}
+	return len(files)
+}
+
+func TestUpload_NoDuplication(t *testing.T) {
+	storagePath := "../../storage"
+
+	os.RemoveAll(storagePath)
+	os.MkdirAll(filepath.Join(storagePath, BlocksDir), 0755)
+	os.MkdirAll(filepath.Join(storagePath, MetadataDir), 0755)
+
+	data, err := os.ReadFile("../../testdata/files/test1.txt")
+	if err != nil {
+		t.Fatalf("failed to read file: %v", err)
+	}
+
+	// 1st upload
+	resp1, err := http.Post("http://localhost:8080/upload", "application/octet-stream", bytes.NewReader(data))
+	if err != nil {
+		t.Fatalf("failed to send 1st request: %v", err)
+	}
+	resp1.Body.Close()
+
+	count1 := countFiles(filepath.Join(storagePath, BlocksDir))
+
+	// 2nd upload
+	resp2, err := http.Post("http://localhost:8080/upload", "application/octet-stream", bytes.NewReader(data))
+	if err != nil {
+		t.Fatalf("failed to send 2nd request: %v", err)
+	}
+	resp2.Body.Close()
+
+	count2 := countFiles(filepath.Join(storagePath, BlocksDir))
+
+	if count2 != count1 {
+		t.Error("duplicate blocks found")
+	}
+}
 func TestUpload(t *testing.T) {
 	tests := []struct {
 		name     string
