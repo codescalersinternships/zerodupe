@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -88,4 +89,35 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fileHashStr))
 
+}
+
+func Download(w http.ResponseWriter, r *http.Request) {
+	requestedFileHash := strings.TrimPrefix(r.URL.Path, "/download/")
+
+	if requestedFileHash == "" {
+		http.Error(w, "file hash not provided", http.StatusBadRequest)
+		return
+	}
+
+	metadataPath := filepath.Join(StorageRoot, MetadataDir, requestedFileHash[0:4], requestedFileHash)
+	metadata, err := os.ReadFile(metadataPath)
+	if err != nil {
+		http.Error(w, "file not found", http.StatusNotFound)
+		return
+	}
+
+	blockHashes := strings.Split(string(metadata), "\n")
+
+	for _, blockHash := range blockHashes {
+		if blockHash == "" {
+			continue
+		}
+		blockPath := filepath.Join(StorageRoot, BlocksDir, blockHash[0:4], blockHash)
+		blockData, err := os.ReadFile(blockPath)
+		if err != nil {
+			http.Error(w, "failed to read block", http.StatusInternalServerError)
+			return
+		}
+		w.Write(blockData)
+	}
 }

@@ -14,6 +14,7 @@ func handleRequests() {
 
 	r.Get("/", server.HomePage)
 	r.Post("/upload", server.Upload)
+	r.Get("/download/{fileHash}", server.Download)
 
 	fmt.Println("Server starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", r))
